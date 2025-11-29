@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartOCR Pro - Extract Text from Images</title>
+    <title>TextSnap - Grab Text from Images</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -67,27 +67,31 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             margin-top: 80px;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .header h1 {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 12px;
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 8px;
             color: var(--color-text);
-            letter-spacing: -0.5px;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header p {
             color: var(--color-text-light);
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 400;
         }
 
@@ -95,7 +99,7 @@
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             flex-wrap: wrap;
         }
 
@@ -109,9 +113,9 @@
         .card {
             background: var(--color-surface);
             border-radius: var(--radius);
-            padding: 28px;
+            padding: 24px;
             box-shadow: var(--shadow);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             border: 1px solid var(--color-border);
             transition: box-shadow 0.3s ease;
         }
@@ -123,12 +127,12 @@
         .drop-zone {
             border: 2px dashed var(--color-primary);
             border-radius: var(--radius);
-            padding: 48px;
+            padding: 40px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
             background: linear-gradient(135deg, #f0f7ff 0%, #e0f2ff 100%);
-            min-height: 160px;
+            min-height: 140px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -147,18 +151,18 @@
         }
 
         .drop-zone-icon {
-            font-size: 52px;
-            margin-bottom: 14px;
+            font-size: 48px;
+            margin-bottom: 12px;
             animation: float 3s ease-in-out infinite;
         }
 
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+            50% { transform: translateY(-6px); }
         }
 
         .drop-zone-text {
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 600;
             margin-bottom: 6px;
             color: var(--color-text);
@@ -174,14 +178,14 @@
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
-            margin-top: 24px;
+            margin-top: 20px;
         }
 
         .btn {
-            padding: 11px 24px;
+            padding: 12px 28px;
             border: none;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -227,7 +231,7 @@
 
         .text-display {
             position: relative;
-            margin-top: 24px;
+            margin-top: 20px;
         }
 
         .text-display-header {
@@ -241,7 +245,7 @@
 
         .text-display-title {
             font-weight: 700;
-            font-size: 15px;
+            font-size: 16px;
             color: var(--color-text);
             letter-spacing: 0.3px;
         }
@@ -305,12 +309,12 @@
 
         .text-area {
             width: 100%;
-            height: 280px;
-            padding: 14px;
+            height: 400px;
+            padding: 20px;
             border: 1.5px solid var(--color-border);
             border-radius: 8px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
+            font-size: 14px;
             line-height: 1.7;
             color: var(--color-text);
             background: var(--color-surface);
@@ -355,13 +359,13 @@
             border: none;
             cursor: pointer;
             font-size: 18px;
-            padding: 4px 8px;
+            padding: 6px 12px;
             border-radius: 6px;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 4px;
-            font-size: 12px;
+            gap: 6px;
+            font-size: 13px;
             color: var(--color-text-light);
             font-weight: 500;
         }
@@ -434,7 +438,7 @@
             border-radius: 8px;
             font-size: 14px;
             color: #1e40af;
-            margin-top: 24px;
+            margin-top: 20px;
             border: 1px solid #bfdbfe;
             font-weight: 500;
             line-height: 1.6;
@@ -442,10 +446,10 @@
 
         .language-select,
         .theme-toggle {
-            padding: 9px 14px;
+            padding: 10px 16px;
             border: 1.5px solid var(--color-border);
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 14px;
             background: var(--color-surface);
             color: var(--color-text);
             cursor: pointer;
@@ -485,9 +489,9 @@
             background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
             border: 1px solid #c3e6cb;
             border-radius: 6px;
-            padding: 10px 14px;
-            margin: 10px 0;
-            font-size: 13px;
+            padding: 12px 16px;
+            margin: 12px 0;
+            font-size: 14px;
             color: #155724;
         }
 
@@ -617,15 +621,13 @@
         .extract-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            margin-top: 24px;
+            gap: 30px;
+            margin-top: 20px;
         }
 
         .image-section {
-            flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
 
         .image-preview-container {
@@ -633,13 +635,14 @@
             border: 1.5px solid var(--color-border);
             border-radius: 8px;
             background: var(--color-bg);
-            padding: 12px;
-            height: 400px;
+            padding: 16px;
+            height: 500px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             transition: all 0.2s ease;
+            flex: 1;
         }
 
         .image-preview-container:hover {
@@ -651,10 +654,17 @@
             max-height: 100%;
             object-fit: contain;
             border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .image-preview-container img:hover {
+            transform: scale(1.02);
         }
 
         .text-section {
-            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .ocr-mode-selector {
@@ -667,7 +677,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 13px;
+            font-size: 14px;
             cursor: pointer;
             font-weight: 500;
         }
@@ -682,13 +692,15 @@
         @media (max-width: 1024px) {
             .extract-container {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
-
-            .top-controls {
-                flex-direction: column;
-                gap: 12px;
-                left: 20px;
-                right: 20px;
+            
+            .image-preview-container {
+                height: 400px;
+            }
+            
+            .text-area {
+                height: 350px;
             }
         }
 
@@ -706,19 +718,19 @@
             }
 
             .header h1 {
-                font-size: 26px;
+                font-size: 32px;
             }
 
             .header p {
-                font-size: 14px;
+                font-size: 16px;
             }
 
             .card {
-                padding: 18px;
+                padding: 16px;
             }
 
             .drop-zone {
-                padding: 28px;
+                padding: 24px;
                 min-height: 120px;
             }
 
@@ -732,7 +744,7 @@
             }
 
             .text-area {
-                height: 200px;
+                height: 300px;
             }
 
             .ocr-language-row {
@@ -793,13 +805,13 @@
 
     <div class="container">
         <div class="header">
-            <h1 id="mainTitle">🧠 SmartOCR Pro</h1>
-            <p id="mainSubtitle">Extract text from images, documents, and screenshots</p>
+            <h1 id="mainTitle">📸 TextSnap</h1>
+            <p id="mainSubtitle">Grab text from images in seconds - simple and free!</p>
         </div>
 
         <div class="ocr-language-row">
             <div class="ocr-controls">
-                <label id="ocrModeLabel" style="font-size: 13px; font-weight: 500; color: var(--color-text-light);">Recognition Mode:</label>
+                <label id="ocrModeLabel" style="font-size: 14px; font-weight: 500; color: var(--color-text-light);">Recognition Mode:</label>
                 <div class="ocr-mode-selector">
                     <label>
                         <input type="radio" name="ocrMode" value="fast" checked>
@@ -849,10 +861,13 @@
         <div class="card" id="textCard" style="display: none;">
             <div class="extract-container">
                 <div class="image-section">
-                    <h3 style="margin-bottom: 12px; font-weight: 600; font-size: 14px;" id="previewTitle">📷 Image Preview</h3>
+                    <h3 style="margin-bottom: 12px; font-weight: 600; font-size: 15px;" id="previewTitle">📷 Image Preview</h3>
                     <div class="image-preview-container">
                         <img id="imagePreview" src="" alt="Uploaded image preview" style="display: none;">
                         <span id="noImageText" style="color: var(--color-text-light);">Image preview will appear here</span>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 12px; color: var(--color-text-light); text-align: center;">
+                        💡 Click on the image to view it larger
                     </div>
                 </div>
 
@@ -907,10 +922,10 @@
                         </div>
 
                         <div id="translationResult" style="display: none; margin-top: 16px;">
-                            <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px; color: var(--color-text);">
+                            <div style="font-weight: 600; font-size: 15px; margin-bottom: 8px; color: var(--color-text);">
                                 <span id="translationResultTitle">🌍 Translation</span>
                             </div>
-                            <textarea class="text-area" id="translationArea" readonly style="height: 200px;"></textarea>
+                            <textarea class="text-area" id="translationArea" readonly style="height: 250px;"></textarea>
                             <div class="text-actions">
                                 <button class="copy-icon-btn" id="copyTranslationBtn" title="Copy translation">
                                     <span>📋</span>
@@ -924,7 +939,7 @@
         </div>
 
         <div class="info-box">
-            <strong id="tipLabel">💡 Tips:</strong> <span id="tipText">For best results, use clear images with good lighting. Handwritten text works best with the handwriting mode.</span>
+            <strong id="tipLabel">💡 Tips:</strong> <span id="tipText">For best results, use clear images with good lighting. Handwritten text works best with the handwriting mode. Works great on both desktop and mobile!</span>
         </div>
     </div>
 
@@ -932,11 +947,11 @@
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
 
     <script>
-        // Backend URL - This will be used for enhanced OCR processing
-        const BACKEND_URL = 'teksta-atpazisana.vercel.app/api/ocr';
+        // Backend URL - Updated to use your Vercel app
+        const BACKEND_URL = 'https://teksta-atpazisana.vercel.app/api/ocr';
 
         // Complete OCR Application
-        class SmartOCRApp {
+        class TextSnapApp {
             constructor() {
                 this.extractedText = '';
                 this.currentLanguage = 'eng';
@@ -1029,6 +1044,13 @@
                     if (e.target.files[0]) this.processFile(e.target.files[0]);
                 });
 
+                // Image preview click for zoom (simple version)
+                document.getElementById('imagePreview').addEventListener('click', (e) => {
+                    if (e.target.src && e.target.style.display !== 'none') {
+                        window.open(e.target.src, '_blank');
+                    }
+                });
+
                 // Actions
                 document.getElementById('clearBtn').addEventListener('click', () => this.clearAll());
                 document.getElementById('copyBtn').addEventListener('click', () => this.copyToClipboard());
@@ -1094,8 +1116,8 @@
             getTranslations() {
                 return {
                     en: {
-                        title: '🧠 SmartOCR Pro',
-                        subtitle: 'Extract text from images, documents, and screenshots',
+                        title: '📸 TextSnap',
+                        subtitle: 'Grab text from images in seconds - simple and free!',
                         dragText: 'Drop image here or click to browse',
                         dragSubtext: 'Supports JPG, PNG, BMP (max 10MB)',
                         selectBtn: 'Select Image',
@@ -1108,7 +1130,7 @@
                         copyBtn: 'Copy Text',
                         downloadBtn: 'Download',
                         tipLabel: '💡 Tips:',
-                        tipText: 'For best results, use clear images with good lighting. Handwritten text works best with the handwriting mode.',
+                        tipText: 'For best results, use clear images with good lighting. Handwritten text works best with the handwriting mode. Works great on both desktop and mobile!',
                         ocrMode: 'Recognition Mode:',
                         modeFast: '⚡ Fast',
                         modeAdvanced: '🎯 Accurate',
@@ -1133,8 +1155,8 @@
                         latvian: 'Latvian'
                     },
                     lv: {
-                        title: '🧠 SmartOCR Pro',
-                        subtitle: 'Iegūstiet tekstu no attēliem, dokumentiem un ekrānuzņēmumiem',
+                        title: '📸 TextSnap',
+                        subtitle: 'Iegūstiet tekstu no attēliem dažu sekunžu laikā - vienkārši un bez maksas!',
                         dragText: 'Ievelciet attēlu šeit vai noklikšķiniet',
                         dragSubtext: 'Atbalsta JPG, PNG, BMP (maks. 10MB)',
                         selectBtn: 'Atlasīt attēlu',
@@ -1147,7 +1169,7 @@
                         copyBtn: 'Kopēt tekstu',
                         downloadBtn: 'Lejupielādēt',
                         tipLabel: '💡 Padomi:',
-                        tipText: 'Lai iegūtu labākos rezultātus, izmantojiet skaidrus attēlus ar labu apgaismojumu. Rakstīts teksts vislabāk darbojas ar rokraksta režīmu.',
+                        tipText: 'Lai iegūtu labākos rezultātus, izmantojiet skaidrus attēlus ar labu apgaismojumu. Rokraksta teksts vislabāk darbojas ar rokraksta režīmu. Lieliski darbojas gan datorā, gan mobilajā ierīcē!',
                         ocrMode: 'Atpazīšanas režīms:',
                         modeFast: '⚡ Ātrs',
                         modeAdvanced: '🎯 Precīzs',
@@ -1454,7 +1476,7 @@
 
         // Initialize the application when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            new SmartOCRApp();
+            new TextSnapApp();
         });
     </script>
 </body>
