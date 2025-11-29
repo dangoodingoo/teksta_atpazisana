@@ -1,11 +1,10 @@
 {
-  "name": "smartocr-backend",
+  "name": "smartocr-backend-enhanced",
   "version": "1.0.0",
-  "description": "Backend for SmartOCR Pro",
+  "description": "Enhanced OCR backend with smart processing",
   "main": "api/ocr.js",
   "scripts": {
-    "dev": "vercel dev",
-    "start": "node api/ocr.js"
+    "dev": "vercel dev"
   },
   "dependencies": {
     "tesseract.js": "^5.0.4"
