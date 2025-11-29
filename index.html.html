@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartOCR Pro - Extract Text from Images</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #2185d0;
+            --color-primary-hover: #1b7aa8;
+            --color-bg: #f5f5f5;
+            --color-surface: #ffffff;
+            --color-text: #1a1a1a;
+            --color-text-light: #6b7280;
+            --color-border: #e5e7eb;
+            --color-success: #10b981;
+            --color-error: #ef4444;
+            --color-warning: #f59e0b;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--color-text);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .top-controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .ui-language-control {
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .theme-center {
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            margin-top: 80px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--color-text);
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: var(--color-text-light);
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .ocr-language-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .ocr-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            border: 1px solid var(--color-border);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--color-primary);
+            border-radius: var(--radius);
+            padding: 48px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e0f2ff 100%);
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--color-primary-hover);
+            background: linear-gradient(135deg, #e8f4ff 0%, #d6ebff 100%);
+            transform: translateY(-2px);
+        }
+
+        .drop-zone.dragover {
+            border-color: var(--color-success);
+            background: linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%);
+        }
+
+        .drop-zone-icon {
+            font-size: 52px;
+            margin-bottom: 14px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .drop-zone-text {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--color-text);
+        }
+
+        .drop-zone-subtext {
+            font-size: 14px;
+            color: var(--color-text-light);
+            font-weight: 400;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 11px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(33, 133, 208, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(33, 133, 208, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--color-surface);
+            color: var(--color-text);
+            border: 1.5px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .text-display {
+            position: relative;
+            margin-top: 24px;
+        }
+
+        .text-display-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .text-display-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--color-text);
+            letter-spacing: 0.3px;
+        }
+
+        .text-stats {
+            font-size: 13px;
+            color: var(--color-text-light);
+            font-weight: 500;
+        }
+
+        .translation-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .translation-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .translation-select {
+            padding: 8px 12px;
+            border: 1.5px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 12px;
+            background: var(--color-surface);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            min-width: 120px;
+        }
+
+        .translation-select:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(33, 133, 208, 0.1);
+        }
+
+        .translation-select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(33, 133, 208, 0.1);
+        }
+
+        .translate-btn {
+            padding: 8px 16px;
+            font-size: 12px;
+            min-height: 34px;
+        }
+
+        .text-area-wrapper {
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .text-area {
+            width: 100%;
+            height: 280px;
+            padding: 14px;
+            border: 1.5px solid var(--color-border);
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--color-text);
+            background: var(--color-surface);
+            transition: all 0.2s ease;
+            resize: none;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .text-area:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(33, 133, 208, 0.1);
+        }
+
+        .text-area::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .text-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .text-area::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: 4px;
+        }
+
+        .text-area::-webkit-scrollbar-thumb:hover {
+            background: var(--color-text-light);
+        }
+
+        .text-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .copy-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: var(--color-text-light);
+            font-weight: 500;
+        }
+
+        .copy-icon-btn:hover {
+            background: var(--color-border);
+            color: var(--color-primary);
+        }
+
+        .copy-icon-btn.copied {
+            color: var(--color-success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 16px;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status.success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status.error {
+            background: #fef2f2;
+            color: #7f1d1d;
+            border: 1px solid #fecaca;
+        }
+
+        .status.info {
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .status.warning {
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fef3c7;
+        }
+
+        .status-icon {
+            font-size: 18px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e0f2ff 100%);
+            border-left: 4px solid var(--color-primary);
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1e40af;
+            margin-top: 24px;
+            border: 1px solid #bfdbfe;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .language-select,
+        .theme-toggle {
+            padding: 9px 14px;
+            border: 1.5px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 13px;
+            background: var(--color-surface);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+
+        .language-select:hover,
+        .theme-toggle:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(33, 133, 208, 0.1);
+        }
+
+        .theme-toggle {
+            background: linear-gradient(135deg, var(--color-surface) 0%, #f9fafb 100%);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--color-border);
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-primary-hover));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .file-info {
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+            border: 1px solid #c3e6cb;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin: 10px 0;
+            font-size: 13px;
+            color: #155724;
+        }
+
+        .kofi-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .kofi-button:hover {
+            transform: scale(1.05);
+        }
+
+        body.dark-mode {
+            --color-primary: #64b5f6;
+            --color-primary-hover: #42a5f5;
+            --color-bg: #0f172a;
+            --color-surface: #1e293b;
+            --color-text: #f1f5f9;
+            --color-text-light: #cbd5e1;
+            --color-border: #334155;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        body.dark-mode .drop-zone {
+            background: linear-gradient(135deg, #1e3a5f 0%, #1a2d4a 100%);
+            border-color: #64b5f6;
+        }
+
+        body.dark-mode .drop-zone:hover {
+            background: linear-gradient(135deg, #1f4168 0%, #1b3654 100%);
+            border-color: #42a5f5;
+        }
+
+        body.dark-mode .btn-secondary {
+            background: #334155;
+            color: #f1f5f9;
+            border-color: #475569;
+        }
+
+        body.dark-mode .btn-secondary:hover {
+            background: #475569;
+            border-color: #64b5f6;
+            color: #64b5f6;
+        }
+
+        body.dark-mode .text-area {
+            background: #0f172a;
+            color: #f1f5f9;
+            border-color: #334155;
+        }
+
+        body.dark-mode .translation-select {
+            background: #0f172a;
+            color: #f1f5f9;
+            border-color: #334155;
+        }
+
+        body.dark-mode .translation-select:hover {
+            border-color: #64b5f6;
+            box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.1);
+        }
+
+        body.dark-mode .copy-icon-btn:hover {
+            background: #334155;
+            color: #64b5f6;
+        }
+
+        body.dark-mode .info-box {
+            background: linear-gradient(135deg, #1e3a5f 0%, #1a2d4a 100%);
+            border-left-color: #64b5f6;
+            color: #93c5fd;
+            border-color: #3b82f6;
+        }
+
+        body.dark-mode .card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        body.dark-mode .card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .status.success {
+            background: #064e3b;
+            color: #86efac;
+            border-color: #059669;
+        }
+
+        body.dark-mode .status.error {
+            background: #7f1d1d;
+            color: #fca5a5;
+            border-color: #dc2626;
+        }
+
+        body.dark-mode .status.info {
+            background: #1e3a8a;
+            color: #93c5fd;
+            border-color: #3b82f6;
+        }
+
+        body.dark-mode .status.warning {
+            background: #1f2937;
+            color: #fcd34d;
+            border-color: #f59e0b;
+        }
+
+        body.dark-mode .language-select,
+        body.dark-mode .theme-toggle {
+            background: #334155;
+            color: #f1f5f9;
+            border-color: #475569;
+        }
+
+        body.dark-mode .file-info {
+            background: linear-gradient(135deg, #1b3c1b 0%, #2d5a2d 100%);
+            border-color: #4caf50;
+            color: #a5d6a7;
+        }
+
+        .extract-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .image-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .image-preview-container {
+            width: 100%;
+            border: 1.5px solid var(--color-border);
+            border-radius: 8px;
+            background: var(--color-bg);
+            padding: 12px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .image-preview-container:hover {
+            border-color: var(--color-primary);
+        }
+
+        .image-preview-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+
+        .text-section {
+            flex: 1;
+        }
+
+        .ocr-mode-selector {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .ocr-mode-selector label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .ocr-mode-selector input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--color-primary);
+        }
+
+        @media (max-width: 1024px) {
+            .extract-container {
+                grid-template-columns: 1fr;
+            }
+
+            .top-controls {
+                flex-direction: column;
+                gap: 12px;
+                left: 20px;
+                right: 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .top-controls {
+                flex-direction: column;
+                gap: 12px;
+                left: 10px;
+                right: 10px;
+                top: 10px;
+            }
+
+            .container {
+                margin-top: 140px;
+            }
+
+            .header h1 {
+                font-size: 26px;
+            }
+
+            .header p {
+                font-size: 14px;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            .drop-zone {
+                padding: 28px;
+                min-height: 120px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .text-area {
+                height: 200px;
+            }
+
+            .ocr-language-row {
+                flex-direction: column;
+            }
+
+            .language-select {
+                width: 100%;
+            }
+
+            .translation-controls {
+                width: 100%;
+            }
+
+            .translation-select {
+                flex: 1;
+                min-width: 100px;
+            }
+
+            .translate-btn {
+                width: 100%;
+            }
+
+            .image-preview-container {
+                height: 300px;
+            }
+
+            .ocr-mode-selector {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .kofi-button {
+                bottom: 10px;
+                right: 10px;
+                transform: scale(0.9);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Ko-fi Button -->
+    <a href="https://ko-fi.com/dangodingo" target="_blank" class="kofi-button">
+        <img height="36" style="border:0px;height:36px;" src="https://storage.ko-fi.com/cdn/kofi2.png" border="0" alt="Buy Me a Coffee at ko-fi.com">
+    </a>
+
+    <div class="top-controls">
+        <div class="ui-language-control">
+            <select class="language-select" id="uiLanguageSelect">
+                <option value="en">English</option>
+                <option value="lv">Latviešu</option>
+            </select>
+        </div>
+        <div class="theme-center">
+            <button class="theme-toggle" id="themeToggle">🌙 Dark</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1 id="mainTitle">🧠 SmartOCR Pro</h1>
+            <p id="mainSubtitle">Extract text from images, documents, and screenshots</p>
+        </div>
+
+        <div class="ocr-language-row">
+            <div class="ocr-controls">
+                <label id="ocrModeLabel" style="font-size: 13px; font-weight: 500; color: var(--color-text-light);">Recognition Mode:</label>
+                <div class="ocr-mode-selector">
+                    <label>
+                        <input type="radio" name="ocrMode" value="fast" checked>
+                        <span id="modeFast">⚡ Fast</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="ocrMode" value="advanced">
+                        <span id="modeAdvanced">🎯 Accurate</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="ocrMode" value="handwriting">
+                        <span id="modeHandwriting">✍️ Handwriting</span>
+                    </label>
+                </div>
+            </div>
+            <select class="language-select" id="languageSelect">
+                <option value="eng">Auto Detect</option>
+                <option value="eng">English</option>
+                <option value="lav">Latvian</option>
+                <option value="rus">Russian</option>
+                <option value="deu">German</option>
+                <option value="fra">French</option>
+                <option value="spa">Spanish</option>
+            </select>
+        </div>
+
+        <div class="card">
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-zone-icon">📁</div>
+                <div class="drop-zone-text" id="dropzoneText">Drop image here or click to browse</div>
+                <div class="drop-zone-subtext" id="dropzoneSubtext">Supports JPG, PNG, BMP (max 10MB)</div>
+            </div>
+
+            <div id="fileInfo" class="file-info" style="display: none;"></div>
+
+            <div class="controls">
+                <button class="btn btn-primary" id="selectBtn">📂 <span id="selectBtnText">Select Image</span></button>
+                <button class="btn btn-secondary" id="clearBtn" disabled>🗑️ <span id="clearBtnText">Clear</span></button>
+            </div>
+
+            <div id="statusArea"></div>
+            <div class="progress-bar" id="progressBar" style="display: none;">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="card" id="textCard" style="display: none;">
+            <div class="extract-container">
+                <div class="image-section">
+                    <h3 style="margin-bottom: 12px; font-weight: 600; font-size: 14px;" id="previewTitle">📷 Image Preview</h3>
+                    <div class="image-preview-container">
+                        <img id="imagePreview" src="" alt="Uploaded image preview" style="display: none;">
+                        <span id="noImageText" style="color: var(--color-text-light);">Image preview will appear here</span>
+                    </div>
+                </div>
+
+                <div class="text-section">
+                    <div class="text-display">
+                        <div class="text-display-header">
+                            <div>
+                                <div class="text-display-title" id="extractedTitle">📝 Extracted Text</div>
+                                <div class="text-stats" style="margin-top: 4px;">
+                                    <span id="charCount">0</span> <span id="charsLabel">characters</span> | 
+                                    <span id="lineCount">0</span> <span id="linesLabel">lines</span>
+                                    <span id="engineBadge" style="margin-left: 8px; padding: 2px 8px; background: var(--color-primary); color: white; border-radius: 10px; font-size: 10px;"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-area-wrapper">
+                            <textarea class="text-area" id="textArea" readonly></textarea>
+                        </div>
+
+                        <div class="text-actions">
+                            <button class="copy-icon-btn" id="copyBtn" title="Copy text">
+                                <span>📋</span>
+                                <span id="copyBtnText">Copy Text</span>
+                            </button>
+                            <button class="copy-icon-btn" id="downloadBtn" title="Download text as file">
+                                <span>💾</span>
+                                <span id="downloadBtnText">Download</span>
+                            </button>
+                        </div>
+
+                        <div class="translation-controls" id="translationControls">
+                            <span class="translation-label" id="translateLabel">Translate To:</span>
+                            <select class="translation-select" id="translateSelect">
+                                <option value="">-- Select Language --</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                                <option value="it">Italian</option>
+                                <option value="pt">Portuguese</option>
+                                <option value="ru">Russian</option>
+                                <option value="ja">Japanese</option>
+                                <option value="zh">Chinese</option>
+                                <option value="ko">Korean</option>
+                                <option value="ar">Arabic</option>
+                                <option value="hi">Hindi</option>
+                                <option value="lv">Latvian</option>
+                            </select>
+                            <button class="btn btn-secondary translate-btn" id="translateBtn" style="display: none;">
+                                <span id="translateBtnText">🌐 Translate</span>
+                            </button>
+                        </div>
+
+                        <div id="translationResult" style="display: none; margin-top: 16px;">
+                            <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px; color: var(--color-text);">
+                                <span id="translationResultTitle">🌍 Translation</span>
+                            </div>
+                            <textarea class="text-area" id="translationArea" readonly style="height: 200px;"></textarea>
+                            <div class="text-actions">
+                                <button class="copy-icon-btn" id="copyTranslationBtn" title="Copy translation">
+                                    <span>📋</span>
+                                    <span id="copyTranslationBtnText">Copy Translation</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong id="tipLabel">💡 Tips:</strong> <span id="tipText">For best results, use clear images with good lighting. Handwritten text works best with the handwriting mode.</span>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" style="display: none;" accept="image/*">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
+
+    <script>
+        // Backend URL - This will be used for enhanced OCR processing
+        const BACKEND_URL = 'https://your-vercel-app.vercel.app/api/ocr';
+
+        // Complete OCR Application
+        class SmartOCRApp {
+            constructor() {
+                this.extractedText = '';
+                this.currentLanguage = 'eng';
+                this.currentUILanguage = 'en';
+                this.currentImageFile = null;
+                this.currentFileName = '';
+                this.ocrMode = 'fast';
+                this.worker = null;
+                this.init();
+            }
+
+            async init() {
+                this.setupEventListeners();
+                this.setupDropZone();
+                this.setupThemeToggle();
+                this.loadPreferences();
+                this.updateUI();
+                await this.initializeTesseract();
+            }
+
+            async initializeTesseract() {
+                try {
+                    this.worker = await Tesseract.createWorker();
+                    await this.worker.loadLanguage('eng');
+                    await this.worker.initialize('eng');
+                } catch (err) {
+                    this.showStatus('OCR engine initialization failed', 'error');
+                }
+            }
+
+            setupThemeToggle() {
+                const themeToggle = document.getElementById('themeToggle');
+                const isDarkMode = localStorage.getItem('darkMode') === 'true';
+                
+                if (isDarkMode) {
+                    document.body.classList.add('dark-mode');
+                    themeToggle.textContent = '☀️ Light';
+                }
+
+                themeToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('dark-mode');
+                    const isNowDark = document.body.classList.contains('dark-mode');
+                    localStorage.setItem('darkMode', isNowDark);
+                    themeToggle.textContent = isNowDark ? '☀️ Light' : '🌙 Dark';
+                });
+            }
+
+            loadPreferences() {
+                const savedUI = localStorage.getItem('uiLanguage') || 'en';
+                this.currentUILanguage = savedUI;
+                document.getElementById('uiLanguageSelect').value = savedUI;
+
+                const savedOCR = localStorage.getItem('ocrLanguage') || 'eng';
+                this.currentLanguage = savedOCR;
+                document.getElementById('languageSelect').value = savedOCR;
+
+                const savedMode = localStorage.getItem('ocrMode') || 'fast';
+                this.ocrMode = savedMode;
+                document.querySelector(`input[name="ocrMode"][value="${savedMode}"]`).checked = true;
+            }
+
+            setupEventListeners() {
+                // UI Language
+                document.getElementById('uiLanguageSelect').addEventListener('change', (e) => {
+                    this.currentUILanguage = e.target.value;
+                    localStorage.setItem('uiLanguage', this.currentUILanguage);
+                    this.updateUI();
+                });
+
+                // OCR Language
+                document.getElementById('languageSelect').addEventListener('change', (e) => {
+                    this.currentLanguage = e.target.value;
+                    localStorage.setItem('ocrLanguage', this.currentLanguage);
+                });
+
+                // OCR Mode
+                document.querySelectorAll('input[name="ocrMode"]').forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        this.ocrMode = e.target.value;
+                        localStorage.setItem('ocrMode', this.ocrMode);
+                    });
+                });
+
+                // File Selection
+                document.getElementById('selectBtn').addEventListener('click', () => {
+                    document.getElementById('fileInput').click();
+                });
+
+                document.getElementById('fileInput').addEventListener('change', (e) => {
+                    if (e.target.files[0]) this.processFile(e.target.files[0]);
+                });
+
+                // Actions
+                document.getElementById('clearBtn').addEventListener('click', () => this.clearAll());
+                document.getElementById('copyBtn').addEventListener('click', () => this.copyToClipboard());
+                document.getElementById('downloadBtn').addEventListener('click', () => this.downloadText());
+                document.getElementById('copyTranslationBtn').addEventListener('click', () => this.copyTranslation());
+                document.getElementById('translateSelect').addEventListener('change', () => this.updateTranslateButton());
+                document.getElementById('translateBtn').addEventListener('click', () => this.translateText());
+            }
+
+            setupDropZone() {
+                const dropZone = document.getElementById('dropZone');
+                
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }, false);
+                });
+
+                dropZone.addEventListener('dragover', () => dropZone.classList.add('dragover'));
+                dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+                dropZone.addEventListener('drop', (e) => {
+                    dropZone.classList.remove('dragover');
+                    if (e.dataTransfer.files.length > 0) this.processFile(e.dataTransfer.files[0]);
+                });
+
+                dropZone.addEventListener('click', () => document.getElementById('fileInput').click());
+            }
+
+            updateUI() {
+                const translations = this.getTranslations();
+                const t = translations[this.currentUILanguage];
+
+                // Update all text elements
+                document.getElementById('mainTitle').textContent = t.title;
+                document.getElementById('mainSubtitle').textContent = t.subtitle;
+                document.getElementById('dropzoneText').textContent = t.dragText;
+                document.getElementById('dropzoneSubtext').textContent = t.dragSubtext;
+                document.getElementById('selectBtnText').textContent = t.selectBtn;
+                document.getElementById('clearBtnText').textContent = t.clearBtn;
+                document.getElementById('previewTitle').textContent = t.previewTitle;
+                document.getElementById('noImageText').textContent = t.imageHere;
+                document.getElementById('extractedTitle').textContent = t.extractedTitle;
+                document.getElementById('charsLabel').textContent = t.characters;
+                document.getElementById('linesLabel').textContent = t.lines;
+                document.getElementById('copyBtnText').textContent = t.copyBtn;
+                document.getElementById('downloadBtnText').textContent = t.downloadBtn;
+                document.getElementById('tipLabel').textContent = t.tipLabel;
+                document.getElementById('tipText').textContent = t.tipText;
+                document.getElementById('ocrModeLabel').textContent = t.ocrMode;
+                document.getElementById('modeFast').textContent = t.modeFast;
+                document.getElementById('modeAdvanced').textContent = t.modeAdvanced;
+                document.getElementById('modeHandwriting').textContent = t.modeHandwriting;
+                document.getElementById('translateLabel').textContent = t.translateLabel;
+                document.getElementById('translateBtnText').textContent = t.translateBtn;
+                document.getElementById('translationResultTitle').textContent = t.translationResultTitle;
+                document.getElementById('copyTranslationBtnText').textContent = t.copyTranslationBtn;
+
+                // Update language options
+                this.updateLanguageOptions();
+            }
+
+            getTranslations() {
+                return {
+                    en: {
+                        title: '🧠 SmartOCR Pro',
+                        subtitle: 'Extract text from images, documents, and screenshots',
+                        dragText: 'Drop image here or click to browse',
+                        dragSubtext: 'Supports JPG, PNG, BMP (max 10MB)',
+                        selectBtn: 'Select Image',
+                        clearBtn: 'Clear',
+                        previewTitle: '📷 Image Preview',
+                        imageHere: 'Image preview will appear here',
+                        extractedTitle: '📝 Extracted Text',
+                        characters: 'characters',
+                        lines: 'lines',
+                        copyBtn: 'Copy Text',
+                        downloadBtn: 'Download',
+                        tipLabel: '💡 Tips:',
+                        tipText: 'For best results, use clear images with good lighting. Handwritten text works best with the handwriting mode.',
+                        ocrMode: 'Recognition Mode:',
+                        modeFast: '⚡ Fast',
+                        modeAdvanced: '🎯 Accurate',
+                        modeHandwriting: '✍️ Handwriting',
+                        translateLabel: 'Translate To:',
+                        translateBtn: '🌐 Translate',
+                        translationResultTitle: '🌍 Translation',
+                        copyTranslationBtn: 'Copy Translation',
+                        errorImage: 'Please select an image file',
+                        errorSize: 'File size exceeds 10MB limit',
+                        processing: 'Processing image...',
+                        extracting: 'Extracting text...',
+                        success: 'Text extracted successfully',
+                        translating: 'Translating...',
+                        translateSuccess: 'Translation completed',
+                        translateFailed: 'Translation service unavailable',
+                        copied: 'Text copied to clipboard',
+                        copiedTranslation: 'Translation copied to clipboard',
+                        downloadSuccess: 'Text file downloaded',
+                        autoDetect: 'Auto Detect',
+                        english: 'English',
+                        latvian: 'Latvian'
+                    },
+                    lv: {
+                        title: '🧠 SmartOCR Pro',
+                        subtitle: 'Iegūstiet tekstu no attēliem, dokumentiem un ekrānuzņēmumiem',
+                        dragText: 'Ievelciet attēlu šeit vai noklikšķiniet',
+                        dragSubtext: 'Atbalsta JPG, PNG, BMP (maks. 10MB)',
+                        selectBtn: 'Atlasīt attēlu',
+                        clearBtn: 'Notīrīt',
+                        previewTitle: '📷 Attēla priekšskatījums',
+                        imageHere: 'Attēla priekšskatījums parādīsies šeit',
+                        extractedTitle: '📝 Iegūtais teksts',
+                        characters: 'rakstzīmes',
+                        lines: 'rindiņas',
+                        copyBtn: 'Kopēt tekstu',
+                        downloadBtn: 'Lejupielādēt',
+                        tipLabel: '💡 Padomi:',
+                        tipText: 'Lai iegūtu labākos rezultātus, izmantojiet skaidrus attēlus ar labu apgaismojumu. Rakstīts teksts vislabāk darbojas ar rokraksta režīmu.',
+                        ocrMode: 'Atpazīšanas režīms:',
+                        modeFast: '⚡ Ātrs',
+                        modeAdvanced: '🎯 Precīzs',
+                        modeHandwriting: '✍️ Rokraksts',
+                        translateLabel: 'Tulkot uz:',
+                        translateBtn: '🌐 Tulkot',
+                        translationResultTitle: '🌍 Tulkojums',
+                        copyTranslationBtn: 'Kopēt tulkojumu',
+                        errorImage: 'Lūdzu, atlasiet attēla failu',
+                        errorSize: 'Faila lielums pārsniedz 10MB ierobežojumu',
+                        processing: 'Apstrādā attēlu...',
+                        extracting: 'Iegūst tekstu...',
+                        success: 'Teksts veiksmīgi iegūts',
+                        translating: 'Tulko...',
+                        translateSuccess: 'Tulkošana pabeigta',
+                        translateFailed: 'Tulkošanas pakalpojums nav pieejams',
+                        copied: 'Teksts nokopēts starpliktuvē',
+                        copiedTranslation: 'Tulkojums nokopēts starpliktuvē',
+                        downloadSuccess: 'Teksta fails lejupielādēts',
+                        autoDetect: 'Automātiski',
+                        english: 'Angļu',
+                        latvian: 'Latviešu'
+                    }
+                };
+            }
+
+            updateLanguageOptions() {
+                const select = document.getElementById('languageSelect');
+                const t = this.getTranslations()[this.currentUILanguage];
+                select.innerHTML = `
+                    <option value="eng">${t.autoDetect}</option>
+                    <option value="eng">${t.english}</option>
+                    <option value="lav">${t.latvian}</option>
+                    <option value="rus">Russian</option>
+                    <option value="deu">German</option>
+                    <option value="fra">French</option>
+                    <option value="spa">Spanish</option>
+                `;
+                select.value = this.currentLanguage;
+            }
+
+            async processFile(file) {
+                if (!file.type.startsWith('image/')) {
+                    this.showStatus(this.getTranslations()[this.currentUILanguage].errorImage, 'error');
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) {
+                    this.showStatus(this.getTranslations()[this.currentUILanguage].errorSize, 'error');
+                    return;
+                }
+
+                this.currentImageFile = file;
+                this.currentFileName = file.name;
+                this.showFileInfo();
+
+                this.showStatus(this.getTranslations()[this.currentUILanguage].processing, 'info');
+                this.updateProgress(30);
+
+                try {
+                    // Try backend first, fallback to Tesseract
+                    let result;
+                    try {
+                        result = await this.processWithBackend(file);
+                    } catch (error) {
+                        console.log('Backend failed, using Tesseract:', error);
+                        result = await this.processWithTesseract(file);
+                    }
+
+                    this.displayResult(result);
+                    this.showStatus(this.getTranslations()[this.currentUILanguage].success, 'success');
+                    
+                } catch (error) {
+                    this.showStatus(`Error: ${error.message}`, 'error');
+                } finally {
+                    this.updateProgress(0);
+                }
+            }
+
+            showFileInfo() {
+                const fileInfo = document.getElementById('fileInfo');
+                const size = (this.currentImageFile.size / 1024 / 1024).toFixed(2);
+                fileInfo.innerHTML = `📄 <strong>File:</strong> ${this.currentFileName} | <strong>Size:</strong> ${size} MB | <strong>Type:</strong> ${this.currentImageFile.type}`;
+                fileInfo.style.display = 'block';
+            }
+
+            async processWithTesseract(file) {
+                const t = this.getTranslations()[this.currentUILanguage];
+                this.showStatus(t.extracting, 'info');
+                this.updateProgress(60);
+
+                if (!this.worker) {
+                    await this.initializeTesseract();
+                }
+
+                await this.worker.loadLanguage(this.currentLanguage);
+                await this.worker.initialize(this.currentLanguage);
+
+                // Configure based on mode
+                const config = {
+                    tessedit_pageseg_mode: this.ocrMode === 'handwriting' ? '6' : '3',
+                    preserve_interword_spaces: '1',
+                };
+
+                await this.worker.setParameters(config);
+
+                const imageData = await this.fileToDataURL(file);
+                const { data: { text, confidence } } = await this.worker.recognize(imageData);
+
+                return {
+                    text: text,
+                    engine: 'browser',
+                    confidence: confidence
+                };
+            }
+
+            async processWithBackend(file) {
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('language', this.currentLanguage);
+                formData.append('mode', this.ocrMode);
+
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                return await response.json();
+            }
+
+            async fileToDataURL(file) {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            displayResult(result) {
+                this.extractedText = result.text;
+                document.getElementById('textArea').value = result.text;
+                document.getElementById('textCard').style.display = 'block';
+                document.getElementById('clearBtn').disabled = false;
+
+                // Show image preview
+                const imagePreview = document.getElementById('imagePreview');
+                const noImageText = document.getElementById('noImageText');
+                if (this.currentImageFile) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                        noImageText.style.display = 'none';
+                    };
+                    reader.readAsDataURL(this.currentImageFile);
+                }
+
+                // Show engine badge
+                const engineBadge = document.getElementById('engineBadge');
+                engineBadge.textContent = result.engine.toUpperCase();
+                engineBadge.style.background = result.engine === 'cloud' ? '#10b981' : '#2185d0';
+
+                // Reset translation
+                document.getElementById('translationResult').style.display = 'none';
+                document.getElementById('translateSelect').value = '';
+                this.updateTranslateButton();
+
+                this.updateStats();
+            }
+
+            updateStats() {
+                const text = document.getElementById('textArea').value;
+                document.getElementById('charCount').textContent = text.length;
+                document.getElementById('lineCount').textContent = text.split('\n').filter(l => l.trim()).length;
+            }
+
+            updateTranslateButton() {
+                const btn = document.getElementById('translateBtn');
+                const select = document.getElementById('translateSelect');
+                btn.style.display = select.value ? 'inline-flex' : 'none';
+            }
+
+            async translateText() {
+                const targetLang = document.getElementById('translateSelect').value;
+                if (!targetLang) return;
+
+                const t = this.getTranslations()[this.currentUILanguage];
+                this.showStatus(t.translating, 'info');
+
+                try {
+                    const text = document.getElementById('textArea').value;
+                    const translationUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+                    
+                    const result = await fetch(translationUrl);
+                    
+                    if (result.ok) {
+                        const data = await result.json();
+                        if (data && data[0]) {
+                            const translatedText = data[0].map(item => item[0]).join('');
+                            document.getElementById('translationArea').value = translatedText;
+                            document.getElementById('translationResult').style.display = 'block';
+                            this.showStatus(t.translateSuccess, 'success');
+                            return;
+                        }
+                    }
+                    
+                    throw new Error('Translation failed');
+                } catch (err) {
+                    this.showStatus(t.translateFailed, 'error');
+                }
+            }
+
+            copyToClipboard() {
+                const text = document.getElementById('textArea').value;
+                if (!text) return;
+                
+                navigator.clipboard.writeText(text).then(() => {
+                    const t = this.getTranslations()[this.currentUILanguage];
+                    this.showStatus(t.copied, 'success');
+                    document.getElementById('copyBtn').classList.add('copied');
+                    setTimeout(() => {
+                        document.getElementById('copyBtn').classList.remove('copied');
+                    }, 2000);
+                });
+            }
+
+            copyTranslation() {
+                const text = document.getElementById('translationArea').value;
+                if (!text) return;
+                
+                navigator.clipboard.writeText(text).then(() => {
+                    const t = this.getTranslations()[this.currentUILanguage];
+                    this.showStatus(t.copiedTranslation, 'success');
+                    document.getElementById('copyTranslationBtn').classList.add('copied');
+                    setTimeout(() => {
+                        document.getElementById('copyTranslationBtn').classList.remove('copied');
+                    }, 2000);
+                });
+            }
+
+            downloadText() {
+                const text = document.getElementById('textArea').value;
+                if (!text) return;
+
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                
+                // Create filename from original image name
+                const originalName = this.currentFileName.replace(/\.[^/.]+$/, "") || 'extracted-text';
+                a.href = url;
+                a.download = `${originalName}-extracted.txt`;
+                a.click();
+                
+                URL.revokeObjectURL(url);
+                
+                const t = this.getTranslations()[this.currentUILanguage];
+                this.showStatus(t.downloadSuccess, 'success');
+            }
+
+            clearAll() {
+                document.getElementById('textArea').value = '';
+                document.getElementById('translationArea').value = '';
+                document.getElementById('textCard').style.display = 'none';
+                document.getElementById('clearBtn').disabled = true;
+                document.getElementById('fileInput').value = '';
+                document.getElementById('translationResult').style.display = 'none';
+                document.getElementById('fileInfo').style.display = 'none';
+                
+                const imagePreview = document.getElementById('imagePreview');
+                const noImageText = document.getElementById('noImageText');
+                imagePreview.style.display = 'none';
+                noImageText.style.display = 'block';
+                
+                this.extractedText = '';
+                this.currentImageFile = null;
+                this.currentFileName = '';
+                document.getElementById('statusArea').innerHTML = '';
+                this.updateProgress(0);
+            }
+
+            updateProgress(percentage) {
+                const progressBar = document.getElementById('progressBar');
+                const progressFill = document.getElementById('progressFill');
+                
+                if (percentage > 0) {
+                    progressBar.style.display = 'block';
+                    progressFill.style.width = `${percentage}%`;
+                } else {
+                    progressBar.style.display = 'none';
+                }
+            }
+
+            showStatus(message, type = 'info') {
+                const statusArea = document.getElementById('statusArea');
+                const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : type === 'warning' ? '⚠' : 'ℹ';
+                statusArea.innerHTML = `<div class="status ${type}"><div class="status-icon">${icon}</div><div>${message}</div></div>`;
+            }
+        }
+
+        // Initialize the application when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SmartOCRApp();
+        });
+    </script>
+</body>
+</html>
